@@ -1,0 +1,286 @@
+-- Create the main GUI
+local screenGui = Instance.new("ScreenGui")
+local frame = Instance.new("Frame")
+local toggleButton = Instance.new("TextButton")
+local statusLabel = Instance.new("TextLabel")
+local titleLabel = Instance.new("TextLabel")
+
+-- Configure the GUI
+screenGui.Name = "RespawnProtection"
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+screenGui.ResetOnSpawn = false
+
+-- Main frame
+frame.Name = "MainFrame"
+frame.Parent = screenGui
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+frame.BorderSizePixel = 0
+frame.Position = UDim2.new(0, 10, 0, 10)
+frame.Size = UDim2.new(0, 200, 0, 100)
+frame.Active = true
+frame.Draggable = true
+frame.Selectable = true
+
+-- Add rounded corners
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)
+corner.Parent = frame
+
+-- Title label
+titleLabel.Name = "TitleLabel"
+titleLabel.Parent = frame
+titleLabel.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+titleLabel.BorderSizePixel = 0
+titleLabel.Position = UDim2.new(0, 0, 0, 0)
+titleLabel.Size = UDim2.new(1, 0, 0, 25)
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.Text = "RESPAWN PROTECTION"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.TextSize = 14
+
+-- Rounded corners for title
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 8)
+titleCorner.Parent = titleLabel
+
+-- Toggle button
+toggleButton.Name = "ToggleButton"
+toggleButton.Parent = frame
+toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+toggleButton.BorderSizePixel = 0
+toggleButton.Position = UDim2.new(0, 25, 0, 35)
+toggleButton.Size = UDim2.new(0, 150, 0, 35)
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.Text = "ENABLE"
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.TextSize = 16
+
+-- Button rounded corners
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(0, 6)
+buttonCorner.Parent = toggleButton
+
+-- Status label
+statusLabel.Name = "StatusLabel"
+statusLabel.Parent = frame
+statusLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Position = UDim2.new(0, 25, 0, 75)
+statusLabel.Size = UDim2.new(0, 150, 0, 20)
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.Text = "Status: DISABLED"
+statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+statusLabel.TextSize = 12
+
+-- Variables
+local isEnabled = false
+local player = game:GetService("Players").LocalPlayer
+local connection = nil
+local protectionActive = false
+
+-- Function to trigger both remotes
+local function triggerProtection()
+    local character = player.Character
+    if not character then 
+        return false 
+    end
+    
+    local humanoid = character:FindFirstChild("Humanoid")
+    if not humanoid then 
+        return false 
+    end
+    
+    -- Wait for backpack
+    local backpack = player:FindFirstChild("Backpack")
+    if not backpack then 
+        return false 
+    end
+    
+    local zenith = backpack:FindFirstChild("The Zenith")
+    local mask = backpack:FindFirstChild("Catastrophic Mask")
+    
+    if not zenith or not mask then
+        return false
+    end
+    
+    local successCount = 0
+    
+    -- Trigger Zenith remote
+    if zenith then
+        local remoteFunction = zenith:FindFirstChild("RemoteFunction")
+        if remoteFunction then
+            local args = {
+                "protect",
+                {character, humanoid, 0}
+            }
+            local success = pcall(function()
+                remoteFunction:InvokeServer(unpack(args))
+            end)
+            if success then
+                successCount = successCount + 1
+            end
+        end
+    end
+    
+    -- Trigger Catastrophic Mask remote
+    if mask then
+        local remoteFunction = mask:FindFirstChild("RemoteFunction")
+        if remoteFunction then
+            local args = {
+                "protect",
+                {character, humanoid, 25}
+            }
+            local success = pcall(function()
+                remoteFunction:InvokeServer(unpack(args))
+            end)
+            if success then
+                successCount = successCount + 1
+            end
+        end
+    end
+    
+    return successCount == 2
+end
+
+-- Single attempt function with timeout
+local function attemptProtection()
+    if protectionActive then return true end
+    
+    statusLabel.Text = "Status: Attempting to protect..."
+    statusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+    
+    local success = triggerProtection()
+    
+    if success then
+        protectionActive = true
+        statusLabel.Text = "Status: PROTECTED!"
+        statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+        return true
+    end
+    
+    return false
+end
+
+-- Function to handle respawn
+local function onCharacterAdded(character)
+    if isEnabled then
+        statusLabel.Text = "Status: Respawn detected..."
+        statusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+        
+        protectionActive = false
+        
+        -- Wait for character to fully load
+        task.wait(1)
+        
+        -- Try once after delay
+        task.spawn(function()
+            task.wait(0.5) -- Additional small delay for tools to load
+            if isEnabled and not protectionActive then
+                attemptProtection()
+            end
+        end)
+    end
+end
+
+-- Toggle function
+local function toggle()
+    isEnabled = not isEnabled
+    
+    if isEnabled then
+        toggleButton.Text = "DISABLE"
+        toggleButton.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+        statusLabel.Text = "Status: ENABLED"
+        statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+        
+        protectionActive = false
+        
+        -- Set up character added connection
+        if connection then
+            connection:Disconnect()
+        end
+        connection = player.CharacterAdded:Connect(onCharacterAdded)
+        
+        -- Try once immediately if character exists
+        if player.Character then
+            task.spawn(function()
+                task.wait(1)
+                if isEnabled and not protectionActive then
+                    attemptProtection()
+                end
+            end)
+        end
+    else
+        toggleButton.Text = "ENABLE"
+        toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        statusLabel.Text = "Status: DISABLED"
+        statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+        
+        protectionActive = false
+        
+        -- Clean up connection
+        if connection then
+            connection:Disconnect()
+            connection = nil
+        end
+    end
+end
+
+-- Connect button click
+toggleButton.MouseButton1Click:Connect(toggle)
+
+-- Make GUI draggable
+local dragging = false
+local dragInput
+local dragStart
+local startPos
+
+frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = frame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+frame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+local userInputService = game:GetService("UserInputService")
+userInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- Cleanup function
+local function onDestroy()
+    isEnabled = false
+    if connection then
+        connection:Disconnect()
+        connection = nil
+    end
+end
+
+-- Handle when GUI is removed
+screenGui.AncestryChanged:Connect(function()
+    if screenGui.Parent == nil then
+        onDestroy()
+    end
+end)
+
+print("✅ Respawn Protection loaded! Will protect ONCE per respawn when enabled!")
