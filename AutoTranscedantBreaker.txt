@@ -1,0 +1,355 @@
+-- Create the main GUI
+local screenGui = Instance.new("ScreenGui")
+local frame = Instance.new("Frame")
+local toggleButton = Instance.new("TextButton")
+local statusLabel = Instance.new("TextLabel")
+local titleLabel = Instance.new("TextLabel")
+local speedLabel = Instance.new("TextLabel")
+local dropdownButton = Instance.new("TextButton")
+local dropdownList = Instance.new("ScrollingFrame")
+
+-- Configure the GUI
+screenGui.Name = "RemoteSpammer"
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+screenGui.ResetOnSpawn = false
+
+-- Main frame (slightly taller to accommodate dropdown)
+frame.Name = "MainFrame"
+frame.Parent = screenGui
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+frame.BorderSizePixel = 0
+frame.Position = UDim2.new(0, 10, 0, 10)
+frame.Size = UDim2.new(0, 250, 0, 170)
+frame.Active = true
+frame.Draggable = true
+frame.Selectable = true
+
+-- Add rounded corners
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)
+corner.Parent = frame
+
+-- Title label
+titleLabel.Name = "TitleLabel"
+titleLabel.Parent = frame
+titleLabel.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+titleLabel.BorderSizePixel = 0
+titleLabel.Position = UDim2.new(0, 0, 0, 0)
+titleLabel.Size = UDim2.new(1, 0, 0, 25)
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.Text = "TRANSCENDENT BREAKER"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.TextSize = 14
+
+-- Rounded corners for title
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 8)
+titleCorner.Parent = titleLabel
+
+-- Dropdown label
+local dropdownLabel = Instance.new("TextLabel")
+dropdownLabel.Name = "DropdownLabel"
+dropdownLabel.Parent = frame
+dropdownLabel.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+dropdownLabel.Position = UDim2.new(0, 25, 0, 30)
+dropdownLabel.Size = UDim2.new(0, 200, 0, 20)
+dropdownLabel.Font = Enum.Font.Gotham
+dropdownLabel.Text = "Select Position:"
+dropdownLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+dropdownLabel.TextSize = 12
+
+-- Rounded corners for label
+local dropdownLabelCorner = Instance.new("UICorner")
+dropdownLabelCorner.CornerRadius = UDim.new(0, 4)
+dropdownLabelCorner.Parent = dropdownLabel
+
+-- Dropdown button
+dropdownButton.Name = "DropdownButton"
+dropdownButton.Parent = frame
+dropdownButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+dropdownButton.BorderSizePixel = 0
+dropdownButton.Position = UDim2.new(0, 25, 0, 55)
+dropdownButton.Size = UDim2.new(0, 200, 0, 30)
+dropdownButton.Font = Enum.Font.Gotham
+dropdownButton.Text = "Position 1"
+dropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+dropdownButton.TextSize = 14
+
+-- Dropdown button rounded corners
+local dropdownButtonCorner = Instance.new("UICorner")
+dropdownButtonCorner.CornerRadius = UDim.new(0, 6)
+dropdownButtonCorner.Parent = dropdownButton
+
+-- Dropdown arrow
+local arrowLabel = Instance.new("TextLabel")
+arrowLabel.Name = "ArrowLabel"
+arrowLabel.Parent = dropdownButton
+arrowLabel.Size = UDim2.new(0, 30, 1, 0)
+arrowLabel.Position = UDim2.new(1, -30, 0, 0)
+arrowLabel.BackgroundTransparency = 1
+arrowLabel.Text = "▼"
+arrowLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+arrowLabel.Font = Enum.Font.Gotham
+arrowLabel.TextSize = 14
+
+-- Dropdown list (initially hidden)
+dropdownList.Name = "DropdownList"
+dropdownList.Parent = frame
+dropdownList.Size = UDim2.new(0, 200, 0, 90)
+dropdownList.Position = UDim2.new(0, 25, 0, 85)
+dropdownList.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+dropdownList.BorderSizePixel = 0
+dropdownList.Visible = false
+dropdownList.ZIndex = 10
+dropdownList.CanvasSize = UDim2.new(0, 0, 0, 0)
+dropdownList.ScrollBarThickness = 6
+dropdownList.AutomaticCanvasSize = Enum.AutomaticSize.Y
+
+-- Dropdown list rounded corners
+local dropdownListCorner = Instance.new("UICorner")
+dropdownListCorner.CornerRadius = UDim.new(0, 6)
+dropdownListCorner.Parent = dropdownList
+
+-- Toggle button
+toggleButton.Name = "ToggleButton"
+toggleButton.Parent = frame
+toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+toggleButton.BorderSizePixel = 0
+toggleButton.Position = UDim2.new(0, 25, 0, 95)
+toggleButton.Size = UDim2.new(0, 200, 0, 40)
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.Text = "START SPAMMING"
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.TextSize = 18
+
+-- Button rounded corners
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(0, 6)
+buttonCorner.Parent = toggleButton
+
+-- Speed indicator
+speedLabel.Name = "SpeedLabel"
+speedLabel.Parent = frame
+speedLabel.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+speedLabel.Position = UDim2.new(0, 25, 0, 140)
+speedLabel.Size = UDim2.new(0, 200, 0, 20)
+speedLabel.Font = Enum.Font.Gotham
+speedLabel.Text = "Spam Rate: 0.2 seconds"
+speedLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+speedLabel.TextSize = 12
+
+-- Rounded corners for speed label
+local speedCorner = Instance.new("UICorner")
+speedCorner.CornerRadius = UDim.new(0, 4)
+speedCorner.Parent = speedLabel
+
+-- Status label
+statusLabel.Name = "StatusLabel"
+statusLabel.Parent = frame
+statusLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Position = UDim2.new(0, 25, 0, 165)
+statusLabel.Size = UDim2.new(0, 200, 0, 20)
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.Text = "Status: IDLE"
+statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+statusLabel.TextSize = 12
+
+-- Variables
+local isSpamming = false
+local selectedPosition = 1
+local dropdownOpen = false
+
+-- Position data
+local positions = {
+    {name = "Position 1", vector = Vector3.new(23.192707061767578, -0.5, -27.228668212890625)},
+    {name = "Position 2", vector = Vector3.new(0, 0, 0)}, -- Add more positions as needed
+    {name = "Position 3", vector = Vector3.new(0, 0, 0)}  -- Add more positions as needed
+}
+
+-- Get the remote events
+local player = game:GetService("Players").LocalPlayer
+local backpack = player:WaitForChild("Backpack")
+local transcendentBreaker = backpack:WaitForChild("Transcendent Breaker")
+
+local roarEvent = transcendentBreaker:WaitForChild("RoarEvent")
+local judgmentEvent = transcendentBreaker:WaitForChild("JudgmentEvent")
+local m1Event = transcendentBreaker:WaitForChild("M1Event")
+
+-- Create dropdown items
+local function createDropdownItems()
+    for i, pos in ipairs(positions) do
+        local item = Instance.new("TextButton")
+        item.Name = "Item_" .. i
+        item.Size = UDim2.new(1, 0, 0, 25)
+        item.Position = UDim2.new(0, 0, 0, (i-1) * 25)
+        item.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        item.BackgroundTransparency = 0.3
+        item.Text = pos.name
+        item.TextColor3 = Color3.fromRGB(200, 200, 200)
+        item.Font = Enum.Font.Gotham
+        item.TextSize = 12
+        item.ZIndex = 11
+        item.Parent = dropdownList
+        
+        -- Hover effect
+        item.MouseEnter:Connect(function()
+            item.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+        end)
+        
+        item.MouseLeave:Connect(function()
+            item.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        end)
+        
+        -- Selection handler
+        item.MouseButton1Click:Connect(function()
+            selectedPosition = i
+            dropdownButton.Text = positions[i].name
+            toggleDropdown()
+        end)
+    end
+    
+    dropdownList.CanvasSize = UDim2.new(0, 0, 0, #positions * 25)
+end
+createDropdownItems()
+
+-- Toggle dropdown function
+local function toggleDropdown()
+    dropdownOpen = not dropdownOpen
+    dropdownList.Visible = dropdownOpen
+    arrowLabel.Text = dropdownOpen and "▲" or "▼"
+end
+
+-- Close dropdown when clicking outside
+local userInputService = game:GetService("UserInputService")
+userInputService.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if dropdownOpen then
+            local mousePos = userInputService:GetMouseLocation()
+            local absolutePos = dropdownList.AbsolutePosition
+            local absoluteSize = dropdownList.AbsoluteSize
+            
+            if mousePos.X < absolutePos.X or mousePos.X > absolutePos.X + absoluteSize.X or
+               mousePos.Y < absolutePos.Y or mousePos.Y > absolutePos.Y + absoluteSize.Y then
+                toggleDropdown()
+            end
+        end
+    end
+end)
+
+-- Dropdown button click
+dropdownButton.MouseButton1Click:Connect(toggleDropdown)
+
+-- Function to fire all remotes
+local function fireAllRemotes()
+    -- Fire RoarEvent (no args)
+    pcall(function()
+        roarEvent:FireServer()
+    end)
+    
+    -- Fire JudgmentEvent with position
+    pcall(function()
+        judgmentEvent:FireServer(positions[selectedPosition].vector)
+    end)
+    
+    -- Fire M1Event (no args)
+    pcall(function()
+        m1Event:FireServer()
+    end)
+end
+
+-- Spam function (0.2 second interval)
+local function spamLoop()
+    local spamCount = 0
+    while isSpamming do
+        fireAllRemotes()
+        spamCount = spamCount + 1
+        
+        -- Update status every 10 iterations
+        if spamCount % 10 == 0 then
+            statusLabel.Text = string.format("Spamming: %d combos (%s)", spamCount, positions[selectedPosition].name)
+        end
+        
+        -- Wait 0.2 seconds
+        wait(0.2)
+    end
+end
+
+-- Toggle function
+local function toggleSpam()
+    isSpamming = not isSpamming
+    
+    if isSpamming then
+        -- Update UI for ON state
+        toggleButton.Text = "🔴 STOP SPAMMING"
+        toggleButton.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+        statusLabel.Text = string.format("Spamming: 0 combos (%s)", positions[selectedPosition].name)
+        statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+        speedLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+        
+        -- Start spamming
+        spawn(spamLoop)
+    else
+        -- Update UI for OFF state
+        toggleButton.Text = "START SPAMMING"
+        toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        statusLabel.Text = "Status: IDLE"
+        statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+        speedLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+    end
+end
+
+-- Connect button click
+toggleButton.MouseButton1Click:Connect(toggleSpam)
+
+-- Make GUI draggable
+local dragging = false
+local dragInput
+local dragStart
+local startPos
+
+frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = frame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+frame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+userInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- Cleanup function
+local function onDestroy()
+    isSpamming = false
+end
+
+-- Handle when GUI is removed
+screenGui.AncestryChanged:Connect(function()
+    if screenGui.Parent == nil then
+        onDestroy()
+    end
+end)
+
+print("✅ Transcendent Breaker Spammer loaded! Triggers all 3 remotes every 0.2 seconds!")
